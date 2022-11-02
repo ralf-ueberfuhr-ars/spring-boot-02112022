@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
-@RequestMapping("hello")
+@RequestMapping("/hello")
 public class HelloWorldController {
 
     //@RequestMapping(value="hello", method = RequestMethod.GET)
@@ -21,7 +21,7 @@ public class HelloWorldController {
         return String.format("<h1>Hello</h1> %s!", name);
     }
 
-    @GetMapping(value = "2", produces = MediaType.TEXT_PLAIN_VALUE)
+    @GetMapping(value = "/2", produces = MediaType.TEXT_PLAIN_VALUE)
     @ResponseBody
     public String sayHello2() {
         return "Hello World 2!";
