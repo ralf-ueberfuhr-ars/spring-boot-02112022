@@ -50,7 +50,6 @@ public class TodosService {
      *
      * @param item das anzulegende Item (ohne ID)
      * @return das gespeicherte Item (mit ID)
-     * @throws IllegalArgumentException wenn die ID bereits belegt ist
      */
     public Todo create(Todo item) {
         Long newId = todos.keySet().stream()
@@ -64,7 +63,9 @@ public class TodosService {
         result.setDescription(item.getDescription());
         result.setDueDate(item.getDueDate());
         todos.put(newId, result);
-        publisher.publishEvent(new TodosChangedEvent(result, TodosChangedEvent.ChangeType.CREATED));
+        publisher.publishEvent(
+          new TodosChangedEvent(result, TodosChangedEvent.ChangeType.CREATED)
+        );
         return result;
     }
 
@@ -72,32 +73,30 @@ public class TodosService {
      * Aktualisiert ein Item im Datenbestand.
      *
      * @param item das zu ändernde Item mit ID
-     * @return <tt>true</tt>, wenn das Item gefunden und geändert wurde
-     * @throws IllegalArgumentException wenn die ID nicht belegt ist
+     * @throws NotFoundException wenn das Todo nicht vorhanden ist
      */
-    public boolean update(Todo item) {
+    public void update(Todo item) {
         // remove separat, um nicht neue Einträge hinzuzufügen (put allein würde auch ersetzen)
-        if(null != todos.remove(item.getId())) {
+        if (null != todos.remove(item.getId())) {
             todos.put(item.getId(), item);
             publisher.publishEvent(new TodosChangedEvent(item, TodosChangedEvent.ChangeType.REPLACED));
-            return true;
+        } else {
+            throw new NotFoundException(item.getId());
         }
-        return false;
     }
 
     /**
      * Entfernt ein Item aus dem Datenbestand.
      *
      * @param id die ID des zu löschenden Items
-     * @return <tt>true</tt>, wenn das Item gefunden und gelöscht wurde
+     * @throws NotFoundException wenn das Todo nicht vorhanden ist
      */
-    public boolean delete(long id) {
+    public void delete(long id) {
         Todo removedTodo = todos.remove(id);
-        if(null != removedTodo) {
+        if (null != removedTodo) {
             publisher.publishEvent(new TodosChangedEvent(removedTodo, TodosChangedEvent.ChangeType.DELETED));
-            return true;
         } else {
-            return false;
+           throw new NotFoundException(id);
         }
 
     }

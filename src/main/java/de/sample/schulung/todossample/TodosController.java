@@ -67,7 +67,8 @@ public class TodosController {
      */
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Todo findById(@PathVariable("id") long id) {
-        return service.findById(id).orElse(null);
+        return service.findById(id)
+          .orElseThrow(() -> new NotFoundException(id));
     }
 
     /*
