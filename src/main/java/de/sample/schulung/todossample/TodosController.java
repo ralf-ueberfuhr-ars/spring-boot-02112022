@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
 import java.net.URI;
 import java.util.Collection;
 
@@ -36,7 +37,7 @@ public class TodosController {
      *   - 422 (Validierungsfehler)
      */
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Void> create(@RequestBody Todo todo) {
+    public ResponseEntity<Void> create(@Valid @RequestBody Todo todo) {
         final Todo newTodo = service.create(todo);
         // Location: http://localhost:9080/todos/100
         final URI location = linkTo(methodOn(TodosController.class).findById(newTodo.getId()))
@@ -85,6 +86,7 @@ public class TodosController {
     public void update(
       @PathVariable("id")
       long id,
+      @Valid
       @RequestBody
       Todo todo
     ) {

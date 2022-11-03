@@ -3,7 +3,9 @@ package de.sample.schulung.todossample;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
+import javax.validation.Valid;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -12,6 +14,7 @@ import java.util.Optional;
 import java.util.TreeMap;
 
 // Business-Logik
+@Validated
 @Service
 @RequiredArgsConstructor
 public class TodosService {
@@ -51,7 +54,7 @@ public class TodosService {
      * @param item das anzulegende Item (ohne ID)
      * @return das gespeicherte Item (mit ID)
      */
-    public Todo create(Todo item) {
+    public Todo create(@Valid Todo item) {
         Long newId = todos.keySet().stream()
           .max(Comparator.naturalOrder())
           .orElse(0L)
@@ -75,7 +78,7 @@ public class TodosService {
      * @param item das zu ändernde Item mit ID
      * @throws NotFoundException wenn das Todo nicht vorhanden ist
      */
-    public void update(Todo item) {
+    public void update(@Valid Todo item) {
         // remove separat, um nicht neue Einträge hinzuzufügen (put allein würde auch ersetzen)
         if (null != todos.remove(item.getId())) {
             todos.put(item.getId(), item);
