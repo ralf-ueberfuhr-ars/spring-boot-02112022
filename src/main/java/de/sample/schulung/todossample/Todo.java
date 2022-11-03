@@ -7,6 +7,7 @@ import java.time.LocalDate;
 
 public @Data class Todo {
 
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long id;
     private String title;
     private String description;

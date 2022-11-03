@@ -1,5 +1,6 @@
 package de.sample.schulung.todossample;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -15,14 +16,16 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URI;
 import java.util.Collection;
-import java.util.List;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @RequestMapping("/todos")
+@RequiredArgsConstructor
 public class TodosController {
+
+    private final TodosService service;
 
     /*
      * CREATE
@@ -34,8 +37,7 @@ public class TodosController {
      */
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> create(@RequestBody Todo todo) {
-        // Pseudo ID
-        todo.setId(100L);
+        service.create(todo);
         // Location: http://localhost:9080/todos/100
         final URI location = linkTo(methodOn(TodosController.class).findById(todo.getId()))
           .toUri();
@@ -52,10 +54,7 @@ public class TodosController {
      */
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public Collection<Todo> findAll() {
-        Todo todo = new Todo();
-        todo.setId(1L);
-        todo.setTitle("Spring lernen");
-        return List.of(todo);
+        return service.findAll();
     }
 
     /*
@@ -68,10 +67,7 @@ public class TodosController {
      */
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Todo findById(@PathVariable("id") long id) {
-        Todo todo = new Todo();
-        todo.setId(id);
-        todo.setTitle("Spring lernen");
-        return todo;
+        return service.findById(id).orElse(null);
     }
 
     /*
@@ -89,8 +85,10 @@ public class TodosController {
       @PathVariable("id")
       long id,
       @RequestBody
-      Todo todo) {
-        // do nothing
+      Todo todo
+    ) {
+        todo.setId(id);
+        service.update(todo);
     }
 
     /*
@@ -104,7 +102,7 @@ public class TodosController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable("id") long id) {
-        // do nothing
+        service.delete(id);
     }
 
 }
