@@ -1,5 +1,7 @@
 package de.sample.schulung.todossample;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -11,11 +13,18 @@ import java.util.TreeMap;
 
 // Business-Logik
 @Service
+@RequiredArgsConstructor
 public class TodosService {
+
+    private final ApplicationEventPublisher publisher;
 
     // In-Memory-Implementation
     // TODO later, replace it by a CRUD Repository (Persistence/Entity Layer)
     private final Map<Long, Todo> todos = new TreeMap<>();
+
+    long count() {
+        return todos.size();
+    }
 
     /**
      * Gibt alle Todos zurück.
@@ -55,6 +64,7 @@ public class TodosService {
         result.setDescription(item.getDescription());
         result.setDueDate(item.getDueDate());
         todos.put(newId, result);
+        publisher.publishEvent(new TodosChangedEvent(result, TodosChangedEvent.ChangeType.CREATED));
         return result;
     }
 
@@ -67,7 +77,12 @@ public class TodosService {
      */
     public boolean update(Todo item) {
         // remove separat, um nicht neue Einträge hinzuzufügen (put allein würde auch ersetzen)
-        return null != todos.remove(item.getId()) && null == todos.put(item.getId(), item);
+        if(null != todos.remove(item.getId())) {
+            todos.put(item.getId(), item);
+            publisher.publishEvent(new TodosChangedEvent(item, TodosChangedEvent.ChangeType.REPLACED));
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -77,7 +92,14 @@ public class TodosService {
      * @return <tt>true</tt>, wenn das Item gefunden und gelöscht wurde
      */
     public boolean delete(long id) {
-        return null != todos.remove(id);
+        Todo removedTodo = todos.remove(id);
+        if(null != removedTodo) {
+            publisher.publishEvent(new TodosChangedEvent(removedTodo, TodosChangedEvent.ChangeType.DELETED));
+            return true;
+        } else {
+            return false;
+        }
+
     }
 
 }

@@ -37,9 +37,9 @@ public class TodosController {
      */
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> create(@RequestBody Todo todo) {
-        service.create(todo);
+        final Todo newTodo = service.create(todo);
         // Location: http://localhost:9080/todos/100
-        final URI location = linkTo(methodOn(TodosController.class).findById(todo.getId()))
+        final URI location = linkTo(methodOn(TodosController.class).findById(newTodo.getId()))
           .toUri();
         return ResponseEntity.created(location).build();
     }
