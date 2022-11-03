@@ -1,5 +1,6 @@
-package de.sample.schulung.todossample;
+package de.sample.schulung.todossample.boundary;
 
+import de.sample.schulung.todossample.domain.NotFoundException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

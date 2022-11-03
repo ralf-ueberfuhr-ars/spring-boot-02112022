@@ -1,5 +1,8 @@
-package de.sample.schulung.todossample;
+package de.sample.schulung.todossample.boundary;
 
+import de.sample.schulung.todossample.domain.Todo;
+import de.sample.schulung.todossample.domain.TodosService;
+import de.sample.schulung.todossample.domain.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -17,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 import java.net.URI;
 import java.util.Collection;
+import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -27,6 +31,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class TodosController {
 
     private final TodosService service;
+    private final TodoDtoMapper mapper;
 
     /*
      * CREATE
@@ -37,8 +42,8 @@ public class TodosController {
      *   - 422 (Validierungsfehler)
      */
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Void> create(@Valid @RequestBody Todo todo) {
-        final Todo newTodo = service.create(todo);
+    public ResponseEntity<Void> create(@Valid @RequestBody TodoDto todo) {
+        final Todo newTodo = service.create(mapper.map(todo));
         // Location: http://localhost:9080/todos/100
         final URI location = linkTo(methodOn(TodosController.class).findById(newTodo.getId()))
           .toUri();
@@ -54,8 +59,11 @@ public class TodosController {
      *
      */
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public Collection<Todo> findAll() {
-        return service.findAll();
+    public Collection<TodoDto> findAll() {
+        return service.findAll()
+          .stream()
+          .map(mapper::map)
+          .collect(Collectors.toList());
     }
 
     /*
@@ -67,8 +75,9 @@ public class TodosController {
      *   - 404 (Not Found)
      */
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Todo findById(@PathVariable("id") long id) {
+    public TodoDto findById(@PathVariable("id") long id) {
         return service.findById(id)
+          .map(mapper::map)
           .orElseThrow(() -> new NotFoundException(id));
     }
 
@@ -88,10 +97,10 @@ public class TodosController {
       long id,
       @Valid
       @RequestBody
-      Todo todo
+      TodoDto todo
     ) {
         todo.setId(id);
-        service.update(todo);
+        service.update(mapper.map(todo));
     }
 
     /*

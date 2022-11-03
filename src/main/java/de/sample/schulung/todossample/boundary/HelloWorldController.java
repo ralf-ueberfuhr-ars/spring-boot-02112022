@@ -1,4 +1,4 @@
-package de.sample.schulung.todossample;
+package de.sample.schulung.todossample.boundary;
 
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;

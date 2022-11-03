@@ -1,4 +1,4 @@
-package de.sample.schulung.todossample;
+package de.sample.schulung.todossample.domain;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;

@@ -1,4 +1,4 @@
-package de.sample.schulung.todossample;
+package de.sample.schulung.todossample.domain;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
