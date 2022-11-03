@@ -1,8 +1,8 @@
 package de.sample.schulung.todossample.boundary;
 
+import de.sample.schulung.todossample.domain.NotFoundException;
 import de.sample.schulung.todossample.domain.Todo;
 import de.sample.schulung.todossample.domain.TodosService;
-import de.sample.schulung.todossample.domain.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
