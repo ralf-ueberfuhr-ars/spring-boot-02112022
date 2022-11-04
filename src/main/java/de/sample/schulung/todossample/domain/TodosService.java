@@ -7,11 +7,7 @@ import org.springframework.validation.annotation.Validated;
 
 import javax.validation.Valid;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Map;
 import java.util.Optional;
-import java.util.TreeMap;
 
 // Business-Logik
 @Validated
@@ -20,13 +16,11 @@ import java.util.TreeMap;
 public class TodosService {
 
     private final ApplicationEventPublisher publisher;
-
-    // In-Memory-Implementation
-    // TODO later, replace it by a CRUD Repository (Persistence/Entity Layer)
-    private final Map<Long, Todo> todos = new TreeMap<>();
+    private final TodosSink sink;
 
     long count() {
-        return todos.size();
+        return sink.count();
+
     }
 
     /**
@@ -35,7 +29,7 @@ public class TodosService {
      * @return eine unveränderliche Collection
      */
     public Collection<Todo> findAll() {
-        return Collections.unmodifiableCollection(todos.values());
+        return sink.findAll();
     }
 
     /**
@@ -45,7 +39,7 @@ public class TodosService {
      * @return das Suchergebnis
      */
     public Optional<Todo> findById(long id) {
-        return Optional.ofNullable(todos.get(id));
+        return sink.findById(id);
     }
 
     /**
@@ -55,21 +49,12 @@ public class TodosService {
      * @return das gespeicherte Item (mit ID)
      */
     public Todo create(@Valid Todo item) {
-        Long newId = todos.keySet().stream()
-          .max(Comparator.naturalOrder())
-          .orElse(0L)
-          + 1L;
-        // wird später wieder ersetzt
-        final var result = new Todo();
-        result.setId(newId);
-        result.setTitle(item.getTitle());
-        result.setDescription(item.getDescription());
-        result.setDueDate(item.getDueDate());
-        todos.put(newId, result);
+        item.setId(null);
+        sink.update(item);
         publisher.publishEvent(
-          new TodosChangedEvent(result, TodosChangedEvent.ChangeType.CREATED)
+          new TodosChangedEvent(item, TodosChangedEvent.ChangeType.CREATED)
         );
-        return result;
+        return item;
     }
 
     /**
@@ -80,8 +65,8 @@ public class TodosService {
      */
     public void update(@Valid Todo item) {
         // remove separat, um nicht neue Einträge hinzuzufügen (put allein würde auch ersetzen)
-        if (null != todos.remove(item.getId())) {
-            todos.put(item.getId(), item);
+        if (sink.exists(item.getId())) {
+            sink.update(item);
             publisher.publishEvent(new TodosChangedEvent(item, TodosChangedEvent.ChangeType.REPLACED));
         } else {
             throw new NotFoundException(item.getId());
@@ -95,9 +80,10 @@ public class TodosService {
      * @throws NotFoundException wenn das Todo nicht vorhanden ist
      */
     public void delete(long id) {
-        Todo removedTodo = todos.remove(id);
-        if (null != removedTodo) {
-            publisher.publishEvent(new TodosChangedEvent(removedTodo, TodosChangedEvent.ChangeType.DELETED));
+        if (sink.exists(id)) {
+            Todo todo = sink.findById(id).orElse(null);
+            sink.delete(id);
+            publisher.publishEvent(new TodosChangedEvent(todo, TodosChangedEvent.ChangeType.DELETED));
         } else {
            throw new NotFoundException(id);
         }
