@@ -2,31 +2,39 @@ package de.sample.schulung.todossample.boundary;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.sample.schulung.todossample.domain.NotFoundException;
+import de.sample.schulung.todossample.domain.Todo;
 import de.sample.schulung.todossample.domain.TodosService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.time.LocalDate;
+import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 //@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @WebMvcTest
+@ComponentScan(basePackageClasses = TodosController.class)
 class TodosApiTest {
 
     // TodosService mocken
     @MockBean
     TodosService service;
-    @MockBean
-    TodoDtoMapper mapper;
 
     @Autowired
     MockMvc mvc;
@@ -75,6 +83,26 @@ class TodosApiTest {
           )
           .andExpect(status().isUnprocessableEntity());
         verify(service, never()).create(any());
+    }
+
+    /*
+     * Test: due_date im JSON
+     */
+    @Test
+    void shouldUseSnakeCaseForDueDate() throws Exception {
+        // Suche Todo nach ID
+        Todo todo = new Todo();
+        todo.setId(1L);
+        todo.setTitle("test");
+        todo.setDueDate(LocalDate.now());
+        when(service.findById(1)).thenReturn(Optional.of(todo));
+        mvc.perform(
+            get("/todos/1")
+          )
+          .andExpect(status().isOk())
+          .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+          .andExpect(jsonPath("$.due_date").exists())
+        ;
     }
 
 }

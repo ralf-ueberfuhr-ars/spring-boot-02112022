@@ -16,7 +16,6 @@ public @Data class TodoDto {
     @Size(min = 3)
     private String title;
     private String description;
-    @JsonProperty("due_date")
     private LocalDate dueDate;
     @Pattern(regexp = "n|p|c|a|cc")
     private String status;
