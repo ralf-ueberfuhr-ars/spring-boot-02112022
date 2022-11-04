@@ -18,7 +18,7 @@ public class TodosService {
     private final ApplicationEventPublisher publisher;
     private final TodosSink sink;
 
-    long count() {
+    public long count() {
         return sink.count();
 
     }

@@ -1,0 +1,6 @@
+# gültig, wenn Profil "cloud" aktiviert ist
+# hier: cloud = Produktion
+spring:
+  h2:
+    console:
+      enabled: false

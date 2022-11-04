@@ -1,5 +1,6 @@
 package de.sample.schulung.todossample.boundary;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping("/hello")
+@Profile("!cloud")
 public class HelloWorldController {
 
     //@RequestMapping(value="hello", method = RequestMethod.GET)
